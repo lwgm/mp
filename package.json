@@ -1,0 +1,11 @@
+{
+    "NutClient":{
+        "name":"nut api",
+        "description":"nut server的api",
+        "version":"1.0.0",
+        "author":"lwgm",
+        "history":{
+            "1.0.0":"initial"
+        }
+    }
+}
