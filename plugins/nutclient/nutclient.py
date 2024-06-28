@@ -139,7 +139,8 @@ class NutClient(_PluginBase):
                                             'type': 'info',
                                             'variant': 'tonal',
                                             'text': """
-设置方法参照homepage的custmapi设置
+                                            ups服务器的地址，填入例如: 192.168.2.2，ups monitor用户名一般是ups，威联通是qanpups
+homepage的设置参照homepage的custmapi设置
 """
                                         }
                                     }
@@ -169,7 +170,6 @@ class NutClient(_PluginBase):
     async def nutclientapi(self)->Dict[str,list|dict]:
         try:
             async with PyNUTClient(host=self._url,login=self._username,password=self._password) as pnc:
-                print(f"self._url {self._url},self._username {self._username}, self._password {self._password}")
                 __name = await pnc.GetUPSNames()
                 __vars = await pnc.GetUPSVars(ups=self._upsname)
         except Exception as e:
