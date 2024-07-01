@@ -1,0 +1,1 @@
+from .qnapmagie import QnapMagie

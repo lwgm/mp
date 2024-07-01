@@ -7,5 +7,14 @@
         "history":{
             "1.0.0":"initial"
         }
+    },
+    "QnapMagie":{
+        "name":"威联通相册",
+        "description":"威联通相册的api",
+        "version":"1.0.0",
+        "author":"lwgm",
+        "history":{
+            "1.0.0":"initial"
+        }
     }
 }

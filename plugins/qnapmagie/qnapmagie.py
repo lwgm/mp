@@ -1,14 +1,13 @@
 from typing import Tuple, List, Dict, Any
-
+from asyncio import create_task, gather
 from app.plugins import _PluginBase
 
-from .client import PyNUTClient
-
-class NutClient(_PluginBase):
+from .qnap import Qnap as getqnap
+class QnapMagie(_PluginBase):
     # 插件名称
-    plugin_name = "ups状态api"
+    plugin_name = "威联通相册api"
     # 插件描述
-    plugin_desc = "给homepage使用的ups状态"
+    plugin_desc = "给homepage使用的威联通相册数据"
     # 插件图标
     plugin_icon = "https://raw.githubusercontent.com/honue/MoviePilot-Plugins/main/icons/shortcut.jpg"
     # 插件版本
@@ -18,18 +17,17 @@ class NutClient(_PluginBase):
     # 作者主页
     author_url = ""
     # 插件配置项ID前缀
-    plugin_config_prefix = "NutClient_"
+    plugin_config_prefix = "QnapMagie_"
     # 加载顺序
     # 可使用的用户级别
-    auth_level = 1    
-
+    auth_level = 1   
 
     def init_plugin(self, config: dict = None) -> None:
         self._enable = config.get("enable") if config.get("enable") else False
         self._url = config.get("url","")
         self._username = config.get("username","")
         self._password = config.get("password","")
-        self._upsname = config.get("upsname","")
+
     def get_form(self) -> Tuple[List[dict], Dict[str, Any]]:
         return [
             {
@@ -68,24 +66,8 @@ class NutClient(_PluginBase):
                                         'component': 'VTextField',
                                         'props': {
                                             'model': 'url',
-                                            'label': 'ups服务器的地址',
-                                            'placeholder': 'ups server url，填入例如: 192.168.2.2',
-                                        }
-                                    }
-                                ]
-                            }, {
-                                'component': 'VCol',
-                                'props': {
-                                    'cols': 12,
-                                    'md': 3
-                                },
-                                'content': [
-                                    {
-                                        'component': 'VTextField',
-                                        'props': {
-                                            'model': 'upsname',
-                                            'label': 'ups名字',
-                                            'placeholder': '一般是ups，威联通是qanpups',
+                                            'label': '服务器地址加端口',
+                                            'placeholder': '如http://192.168.2.2:5000',
                                         }
                                     }
                                 ]
@@ -100,8 +82,8 @@ class NutClient(_PluginBase):
                                         'component': 'VTextField',
                                         'props': {
                                             'model': 'username',
-                                            'label': 'ups monitor用户名',
-                                            'placeholder': '一般是admin',
+                                            'label': '登录名',
+                                            'placeholder': '',
                                         }
                                     }
                                 ]
@@ -116,8 +98,8 @@ class NutClient(_PluginBase):
                                         'component': 'VTextField',
                                         'props': {
                                             'model': 'password',
-                                            'label': 'ups monitor密码',
-                                            'placeholder': '一般是123456',
+                                            'label': '登录密码',
+                                            'placeholder': '',
                                         }
                                     }
                                 ]
@@ -138,8 +120,8 @@ class NutClient(_PluginBase):
                                             'type': 'info',
                                             'variant': 'tonal',
                                             'text': """
-                                            ups服务器的地址，填入例如: 192.168.2.2，ups monitor用户名一般是ups，威联通是qanpups
-homepage的设置参照homepage的custmapi设置
+这个登录账号不要开启双因素，url处输入完整的地址，如：http://192.168.2.2:5000
+api地址是
 """
                                         }
                                     }
@@ -153,30 +135,40 @@ homepage的设置参照homepage的custmapi设置
             "enable": self._enable,
             "url": self._url,
             "password": self._password,
-            "username":self._username,
-            "upsname":self._upsname
-        }
-    
+            "username":self._username
+        }  
+
+
+    async def getqumagie(self)->Dict[str,str]:
+        data = [
+            ("/qumagie/api/v1/list/mediaCount",{"h":"3"}),
+            ("/qumagie/api/list.php",{"t":"facesCount"}),
+            ("/qumagie/api/v1/list/locations",{"c":"37","lang":"SCH"})
+        ]   
+        r_json = {}
+        q = getqnap(self._url,self._username,self._password)
+        tasks = [create_task(q.post(api=api,data=p)) for api, p in data]
+        results = await gather(*tasks)
+        try:
+            rj1 = await results[0].json()
+            r_json["photocount"] = rj1["photoCount"]
+            r_json["videocount"] = rj1["videoCount"]
+            rj2 = await results[1].json()
+            r_json["personcount"] = str(rj2["DataCount"])
+            rj3 = await results[2].json()
+            r_json["geocout"] = str(len(rj3["DataList"]))
+        except Exception as _:
+            ...
+        return r_json
+
     def get_api(self) -> List[Dict[str, Any]]:
         return [{
-            "path": "/nutclientapi", 
-            "endpoint": self.nutclientapi,
+            "path": "/getqumagie", 
+            "endpoint": self.getqumagie,
             "methods": ["GET"], 
-            "summary": "upsclient的api", 
+            "summary": "威联通qumagie的api", 
             "description": "get请求即可"        
         }]
-
-    async def nutclientapi(self)->Dict[str,list|dict]:
-        try:
-            async with PyNUTClient(host=self._url,login=self._username,password=self._password) as pnc:
-                __name = await pnc.GetUPSNames()
-                __vars = await pnc.GetUPSVars(ups=self._upsname)
-        except Exception as e:
-            __name = "noname"
-            __vars = {}
-        name = __name
-        vars = __vars
-        return {"name":name,"vars":vars} 
 
     def get_page(self) -> List[dict]:
         pass
