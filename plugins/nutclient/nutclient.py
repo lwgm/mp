@@ -140,6 +140,7 @@ class NutClient(_PluginBase):
                                             'text': """
                                             ups服务器的地址，填入例如: 192.168.2.2，ups monitor用户名一般是ups，威联通是qanpups
 homepage的设置参照homepage的custmapi设置
+api地址为 http://moviepilot_url:moviepilot_apiport/api/v1/plugin/NutClient/nutclientapi
 """
                                         }
                                     }

@@ -121,7 +121,7 @@ class QnapMagie(_PluginBase):
                                             'variant': 'tonal',
                                             'text': """
 这个登录账号不要开启双因素，url处输入完整的地址，如：http://192.168.2.2:5000
-api地址是
+api地址是http://moviepilot_url:moviepilot_apiport/api/v1/plugin/QnapMagie/getqumagie
 """
                                         }
                                     }
