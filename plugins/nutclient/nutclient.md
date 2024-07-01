@@ -1,6 +1,7 @@
 ups服务器的地址，填入例如: 192.168.2.2，ups monitor用户名一般是ups，威联通是qanpups    
 api地址为 http://moviepilot_url:moviepilot_apiport/api/v1/plugin/NutClient/nutclientapi    
-homepage的设置参照homepage的custmapi设置，例如
+homepage的设置参照homepage的custmapi设置，例如    
+``` yml
 - ups:
     icon: ups
     description: 监控ups服务器
@@ -27,4 +28,5 @@ homepage的设置参照homepage的custmapi设置，例如
             suffix: "%"
         - field:
             vars: battery.voltage
-            label: 电压
+            label: 电压    
+```

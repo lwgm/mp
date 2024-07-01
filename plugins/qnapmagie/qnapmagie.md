@@ -1,6 +1,6 @@
 api地址为 http://moviepilot_url:moviepilot_apiport/api/v1/plugin/QnapMagie/getqumagie   
 homepage的设置    
-
+``` yml
 - Qumagie Photos:
     widget:
         type: customapi
@@ -16,3 +16,4 @@ homepage的设置
             label: 人物
         - field: geocout
             label: 足迹
+```
