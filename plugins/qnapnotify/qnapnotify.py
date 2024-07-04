@@ -1,7 +1,7 @@
 from typing import List, Tuple, Dict, Any, Optional
 from enum import Enum
 from re import compile
-from asyncio import Protocol, get_running_loop, new_event_loop,sleep
+from asyncio import Protocol, get_running_loop, new_event_loop,sleep,tasks
 from asyncio import run as arun
 from threading import Thread, Event
 
@@ -101,7 +101,7 @@ class TCPServer:
             # await server.serve_forever()
             while not sig.is_set():
                 await server.start_serving()
-                await sleep(0)
+                await tasks.sleep(0)
 
 
 class QnapNotify(_PluginBase):
