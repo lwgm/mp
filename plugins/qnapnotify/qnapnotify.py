@@ -151,16 +151,15 @@ class QnapNotify(_PluginBase):
             if not self._thread or not self._thread.is_alive():
                 self.start()
         else:
-            def send_stop() -> None:
-                s = socket(AF_INET, SOCK_STREAM)
-                server = ("localhost",63210)
-                s.connect(server)
-                str1 = "lwgm"
-                msg = str1.encode("utf-8")
-                s.send(msg)
-            send_stop()
+            self.send_stop()
                 
-
+    def send_stop(self) -> None:
+        s = socket(AF_INET, SOCK_STREAM)
+        server = ("localhost",63210)
+        s.connect(server)
+        str1 = "lwgm"
+        msg = str1.encode("utf-8")
+        s.send(msg)
     def send_notify(self, qnapsyslog:syslog1=None) -> schemas.Response:
         """
         发送通知
@@ -355,7 +354,7 @@ class QnapNotify(_PluginBase):
         """
         退出插件
         """
-        pass
+        self.send_stop()
 
     def get_state(self) -> bool:
         return self._enabled
