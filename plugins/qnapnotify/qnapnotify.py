@@ -1,9 +1,10 @@
 from typing import List, Tuple, Dict, Any, Optional
 from enum import Enum
 from re import compile
-from asyncio import Protocol, get_running_loop, new_event_loop,sleep,tasks
+from asyncio import Protocol, get_running_loop, Future
 from asyncio import run as arun
-from threading import Thread, Event
+from threading import Thread
+from socket import socket, AF_INET, SOCK_STREAM
 
 from app.plugins import _PluginBase
 from app.log import logger
@@ -76,9 +77,13 @@ class syslog1:
         return f"{self.pri} ->{self.times} ->{self.qnapname} ->{self.pro} ->{self.pid} ->{self.msg}"
 
 class TCPServerProtocol(Protocol):
+    def __init__(self,f:Future) -> None:
+        self.future:Future = f
     def connection_made(self, transport) -> None: ...
     def data_received(self, data) -> None:
         msg = data.decode()
+        if msg == "lwgm":
+            self.future.set_result(True)
         s = syslog1.parse(msg)
         if s:
             s.sendevent()
@@ -87,21 +92,19 @@ class TCPServerProtocol(Protocol):
 
     def connection_lost(self, exc: Optional[Exception]) -> None: ...
     def eof_received(self) -> None: ...
+
 class TCPServer:
     @staticmethod
-    async def starttcpserver(host, port,sig:Event) -> None:
-        try:
+    async def starttcpserver(host, port) -> None:
+                      
             loop = get_running_loop()
-        except RuntimeError:
-            loop = new_event_loop()
-        server = await loop.create_server(
-            lambda: TCPServerProtocol(), host=str(host), port=port, start_serving=True
-        )
-        async with server:
-            # await server.serve_forever()
-            while not sig.is_set():
-                await server.start_serving()
-                await tasks.sleep(0)
+            future :Future= loop.create_future()
+            await loop.create_server(
+                lambda: TCPServerProtocol(future), host=str(host), port=port, start_serving=True, reuse_address=True
+            )
+            logger.info("server has been started")
+            await future
+            logger.info("server is to stop")
 
 
 class QnapNotify(_PluginBase):
@@ -113,7 +116,7 @@ class QnapNotify(_PluginBase):
     # 插件描述
     plugin_desc = "接收威联通的syslog并转发。"
     # 插件图标
-    plugin_icon = "https://raw.githubusercontent.com/thsrite/MoviePilot-Plugins/main/icons/synology.png"
+    plugin_icon = "https://github.com/jxxghp/MoviePilot-Plugins/tree/main/icons/Qnap_A.png"
     # 插件版本
     plugin_version = "1.0.0"
     # 插件作者
@@ -125,7 +128,7 @@ class QnapNotify(_PluginBase):
     # 加载顺序
     # 可使用的用户级别
     auth_level = 1
-    __stop_event = Event()
+    # user define
     _thread :Thread = None
     def init_plugin(self, config: dict = None) -> None:
         self._enabled = config.get("enabled",False)
@@ -145,11 +148,17 @@ class QnapNotify(_PluginBase):
           
 
         if self._enabled:
-            self.__stop_event.clear()
             if not self._thread or not self._thread.is_alive():
-                self.start()                   
+                self.start()
         else:
-            self.__stop_event.set()
+            def send_stop() -> None:
+                s = socket(AF_INET, SOCK_STREAM)
+                server = ("localhost",63210)
+                s.connect(server)
+                str1 = "lwgm"
+                msg = str1.encode("utf-8")
+                s.send(msg)
+            send_stop()
                 
 
     def send_notify(self, qnapsyslog:syslog1=None) -> schemas.Response:
@@ -328,14 +337,13 @@ class QnapNotify(_PluginBase):
             "level":"Notice"
         }
 
-    def _run(self,sig) -> None:
-        self._active = True
+    def _run(self) -> None:
         try:
-            arun(TCPServer.starttcpserver("0.0.0.0", 63210,sig))
+            arun(TCPServer.starttcpserver("0.0.0.0", 63210))
         except Exception as _:
             logger.error(f"报错了",exc_info=True)
     def start(self) -> None:
-        self._thread = Thread(target=self._run, args=(self.__stop_event,))
+        self._thread = Thread(target=self._run)
         self._thread.daemon = True
         self._thread.start()
         return
@@ -347,7 +355,7 @@ class QnapNotify(_PluginBase):
         """
         退出插件
         """
-        self.__stop_event.set()
+        pass
 
     def get_state(self) -> bool:
         return self._enabled
