@@ -18,12 +18,13 @@
         }
     },
     "QnapNotify":{
-        "name":"威联通syslog服务器",
+        "name":"威联通syslog转发通知",
         "description":"使用moviepilot的通知功能转发威联通的syslog",
-        "version":"1.0.0",
+        "version":"1.0.1",
         "author":"lwgm",
         "history":{
-            "1.0.0":"initial"
+            "1.0.0":"initial",
+            "1.0.1":"test"
         }
     }
 }

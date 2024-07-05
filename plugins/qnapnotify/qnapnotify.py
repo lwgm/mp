@@ -112,13 +112,13 @@ class QnapNotify(_PluginBase):
     根据群晖的webhook通知改写的
     """
     # 插件名称
-    plugin_name = "威联通Webhook通知"
+    plugin_name = "威联通syslog转发通知"
     # 插件描述
     plugin_desc = "接收威联通的syslog并转发。"
     # 插件图标
     plugin_icon = "https://github.com/jxxghp/MoviePilot-Plugins/tree/main/icons/Qnap_A.png"
     # 插件版本
-    plugin_version = "1.0.0"
+    plugin_version = "1.0.1"
     # 插件作者
     plugin_author = "lwgm"
     # 作者主页
