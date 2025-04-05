@@ -154,12 +154,15 @@ class QnapNotify(_PluginBase):
             self.send_stop()
                 
     def send_stop(self) -> None:
-        s = socket(AF_INET, SOCK_STREAM)
-        server = ("localhost",63210)
-        s.connect(server)
-        str1 = "lwgm"
-        msg = str1.encode("utf-8")
-        s.send(msg)
+        try:
+            s = socket(AF_INET, SOCK_STREAM)
+            server = ("localhost",63210)
+            s.connect(server)
+            str1 = "lwgm"
+            msg = str1.encode("utf-8")
+            s.send(msg)
+        except Exception as e:
+            ... # 本地的服务没有打开
     def send_notify(self, qnapsyslog:syslog1=None) -> schemas.Response:
         """
         发送通知
