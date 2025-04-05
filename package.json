@@ -4,6 +4,7 @@
         "description":"nut server的api",
         "version":"1.0.0",
         "author":"lwgm",
+        "v2": true,
         "history":{
             "1.0.0":"initial"
         }
@@ -13,6 +14,7 @@
         "description":"威联通相册的api",
         "version":"1.0.0",
         "author":"lwgm",
+        "v2": true,
         "history":{
             "1.0.0":"initial"
         }
@@ -22,6 +24,7 @@
         "description":"使用moviepilot的通知功能转发威联通的syslog",
         "version":"1.0.0",
         "author":"lwgm",
+        "v2": true,
         "history":{
             "1.0.0":"initial"
         }
