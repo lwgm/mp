@@ -32,7 +32,8 @@
         "level": 2,
         "v2": true,
         "history":{
-            "1.0.0":"initial"
+            "1.0.0":"initial",
+            "1.0.1":"bug fix"
         }
     }
 }
