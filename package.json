@@ -5,6 +5,7 @@
         "version":"1.0.0",
         "author":"lwgm",
         "level": 2,
+        "labels": "消息通知",
         "v2": true,
         "history":{
             "1.0.0":"initial"
@@ -15,6 +16,7 @@
         "description":"威联通相册的api",
         "version":"1.0.0",
         "author":"lwgm",
+        "labels": "消息通知",
         "level": 2,
         "v2": true,
         "history":{
@@ -26,6 +28,7 @@
         "description":"使用moviepilot的通知功能转发威联通的syslog",
         "version":"1.0.0",
         "author":"lwgm",
+        "labels": "消息通知",
         "level": 2,
         "v2": true,
         "history":{
