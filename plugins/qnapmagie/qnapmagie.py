@@ -150,12 +150,12 @@ api地址是http://moviepilot_url:moviepilot_apiport/api/v1/plugin/QnapMagie/get
         tasks = [create_task(q.post(api=api,data=p)) for api, p in data]
         results = await gather(*tasks)
         try:
-            rj1 = await results[0].json()
+            rj1 = results[0]
             r_json["photocount"] = rj1["photoCount"]
             r_json["videocount"] = rj1["videoCount"]
-            rj2 = await results[1].json()
+            rj2 = results[1]
             r_json["personcount"] = str(rj2["DataCount"])
-            rj3 = await results[2].json()
+            rj3 = results[2]
             r_json["geocout"] = str(len(rj3["DataList"]))
         except Exception as _:
             ...

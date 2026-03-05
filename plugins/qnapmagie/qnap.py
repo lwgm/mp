@@ -25,7 +25,7 @@ class Qnap(metaclass=Singleton):
     __password :Optional[str] = None
     def __init__(self,url,username,password):
         self.__session = ClientSession()
-        if "http://" or "https://" in url:
+        if "http://" in url or "https://" in url:
             self.__baseurl = url
         self.__username = username
         self.__password = password
@@ -47,13 +47,20 @@ class Qnap(metaclass=Singleton):
         """ 
         if not self.__baseurl:
             return None
-        async with lock: 
-            r = await self.__session.post(url=self.__baseurl+"/qumagie/api/v1/list/mediaCount",data = {"h":"3","sid":self.__sid})
-            rj = await r.json()
-            if rj["status"] == 98:
+        if not self.__sid:
+            # Double-checked locking: multiple coroutines may pass the outer
+            # check while __sid is None; the inner check inside the lock
+            # ensures only the first one performs the actual login.
+            async with lock:
+                if not self.__sid:
+                    await self._login()
+        payload = {**data, "sid": self.__sid}
+        resp = await self.__session.post(url=self.__baseurl+api, data=payload)
+        rj = await resp.json()
+        if rj.get("status") == 98:
+            async with lock:
                 await self._login()
-            else:
-                ...  
-        data["sid"] = self.__sid      
-        resp = await self.__session.post(url=self.__baseurl+api,data=data)
-        return resp   
+            payload = {**data, "sid": self.__sid}
+            resp = await self.__session.post(url=self.__baseurl+api, data=payload)
+            rj = await resp.json()
+        return rj   

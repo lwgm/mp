@@ -36,6 +36,11 @@ class LevelType(StrEnum):
 
 
 class syslog1:
+    _RE_FULL = compile(
+        r"<(\w+)>(\w+\s+\d+\s+\d+:\d+:\d+)\s+(\w+)\s+(\w+)\[(\d+)\]:\s+"
+    )
+    _RE_PRI = compile(r"<(\w+)>")
+
     def __init__(self, pri, times, qnapname, pro, pid, msg, omsg) -> None:
         self.pri = pri
         self.times = times
@@ -54,18 +59,12 @@ class syslog1:
         """
         "<28>Feb  7 19:03:19 TS464C qulogd[19238]: conn log: Users: lwgm, Source IP: 192.168.2.1, Computer name: ---, Connection type: HTTP, Accessed resources: Administration, Action: Login Fail"
         """
-        rep = compile(
-            "\<(\w+)>(\w+\s+\d+\s+\d+:\d+:\d+)\s+(\w+)\s+(\w+)\[(\d+)\]:\s+"
-        )
-        m1 = rep.findall(msg)
-        rep2 = compile(
-            "\<(\w+)>"
-        ) # 备用
-        m2 = rep2.findall(msg)
+        m1 = cls._RE_FULL.findall(msg)
+        m2 = cls._RE_PRI.findall(msg)
         if m1:
             omsg = msg
             pri, times, qnapname, pro, pid = m1[0]
-            msg = rep.sub("", msg)
+            msg = cls._RE_FULL.sub("", msg)
             return cls(pri, times, qnapname, pro, pid, msg, omsg)
         elif m2:
             pri = m2[0]
@@ -189,18 +188,8 @@ class QnapNotify(_PluginBase):
         拼装插件配置页面，需要返回两块数据：1、页面配置；2、数据结构
         """
         # 编历 NotificationType 枚举，生成消息类型选项
-        MsgTypeOptions = []
-        for item in NotificationType:
-            MsgTypeOptions.append({
-                "title": item.value,
-                "value": item.name
-            })
-        level_options = []
-        for item in LevelType:
-            level_options.append({
-                "title": item.value,
-                "value": item.name
-            })        
+        MsgTypeOptions = [{"title": item.value, "value": item.name} for item in NotificationType]
+        level_options = [{"title": item.value, "value": item.name} for item in LevelType]
         return [
             {
                 'component': 'VForm',
