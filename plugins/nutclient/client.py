@@ -194,9 +194,7 @@ string API changes.
         if self.__debug :
             print( "[DEBUG] GetUPSNames from server" )
 
-        self_ups_list = []
-        for b in await self.GetUPSList():
-            self_ups_list.append(b.decode('ascii'))
+        self_ups_list = [b.decode('ascii') for b in await self.GetUPSList()]
 
         return self_ups_list
 
@@ -224,8 +222,9 @@ available vars.
         end_offset = 0 - ( len( ("END LIST VAR %s\n" % ups).encode('ascii') ) + 1 )
 
         for current in result[:end_offset].split( b"\n" ) :
-            var  = current[ offset: ].split( b'"' )[0].replace( b" ", b"" )
-            data = current[ offset: ].split( b'"' )[1]
+            parts = current[ offset: ].split( b'"' )
+            var  = parts[0].replace( b" ", b"" )
+            data = parts[1]
             ups_vars[ var ] = data
 
         return( ups_vars )
